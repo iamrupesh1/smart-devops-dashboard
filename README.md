@@ -185,10 +185,22 @@ Check the project online here:
 👉 [Smart DevOps Dashboard – Streamlit App](https://smart-devops-dashboard-jwtcse8jyuuihzq7ckhgr9.streamlit.app/)  
 
 ---
-
 ## 👨‍💻 Author  
 **Rupesh Kumar Shah**  
 📧 Email: shahrupesh511@gmail.com  
 🌐 GitHub: [iamrupesh1](https://github.com/iamrupesh1)  
 
 ---
+## ⚡ Run Locally 
+
+1. **Clone the repository:**(Python 3.8+ and docker instal required)
+```bash
+git clone https://github.com/iamrupesh1/smart-devops-dashboard.git
+cd smart-devops-dashboard
+
+## Install dependencies:
+pip install streamlit psutil boto3 docker requests
+
+## Run the Streamlit app:
+streamlit run app.py
+
