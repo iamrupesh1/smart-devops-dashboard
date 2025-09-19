@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st 
 import psutil
 import random
 import requests
@@ -48,10 +48,6 @@ if section == "Home":
         - Displays system metrics: **CPU**, **Memory**, **Disk**.
         - Uses the `psutil` library to fetch **live system metrics**.
         - You can refresh metrics using the **🔄 Refresh button**.
-        - Example:  
-          - CPU Usage: 40%  
-          - Memory Usage: 65%  
-          - Disk Usage: 70%  
         """)
 
     cpu = psutil.cpu_percent()
@@ -73,13 +69,9 @@ elif section == "Cloud":
         - Shows **AWS resources** (EC2 & S3) using your AWS credentials.
         - Needs the **boto3** library.
         - Input details:
-          - AWS Access Key → Example: `AKIAIOSFODNN7EXAMPLE`
-          - AWS Secret Key → Example: `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`
-          - AWS Region → Example: `us-east-1`
-        - How to find keys:
-          1. Log in to AWS Console.
-          2. Go to **IAM → Users → Security Credentials**.
-          3. Create Access Keys and copy them here.
+          - AWS Access Key
+          - AWS Secret Key
+          - AWS Region
         - If left empty → Demo data is shown.
         """)
 
@@ -121,12 +113,9 @@ elif section == "CI/CD":
         st.markdown("""
         - Fetches **GitHub Actions runs** for your repository.
         - Input details:
-          - Repo Owner → Example: `torvalds`
-          - Repo Name → Example: `linux`
-          - GitHub Token (optional) → Example: `ghp_xxxxxxxxxxxxxxx`
-        - How to find token:
-          1. Go to **GitHub → Settings → Developer settings → Personal Access Tokens**.
-          2. Generate a new token with **repo** permissions.
+          - Repo Owner
+          - Repo Name
+          - GitHub Token (optional)
         - If inputs are empty → Shows demo runs.
         """)
 
@@ -163,9 +152,6 @@ elif section == "Alerts":
         - Uses `psutil` library.
         - Triggers alerts if usage > 80%.
         - Also checks Docker containers status.
-        - Example Output:
-          - ✅ CPU Usage Normal: 45%
-          - 🔥 High CPU Usage: 90%
         """)
 
     cpu = psutil.cpu_percent()
@@ -187,32 +173,39 @@ elif section == "Docker":
 
     with st.expander("📘 Notes - How Docker Section Works"):
         st.markdown("""
-        - Shows all Docker containers.
-        - Uses Python Docker SDK.
-        - Output includes:
-          - **Container Name**
-          - **Status (running/exited)**
-          - **Image**
-        - Example Output:
-          | Container     | Status  | Image      |
-          |---------------|---------|------------|
-          | web_app       | running | nginx:alpine |
+        - Lists Docker containers with Name, Status, Image.
+        - Works live if Docker is available locally.
+        - Online users can upload JSON export from server:
+          Example: docker ps --format '{{json .}}'
         """)
 
-    try:
-        client = docker.from_env()
-        containers = client.containers.list(all=True)
-        if containers:
+    docker_file = st.file_uploader("Upload Docker JSON (optional)", type=["json"])
+    if docker_file:
+        containers_data = json.load(docker_file)
+        data = {
+            "Container": [c["Names"] for c in containers_data],
+            "Status": [c["State"] for c in containers_data],
+            "Image": [c["Image"] for c in containers_data]
+        }
+        st.table(data)
+    else:
+        try:
+            client = docker.from_env()
+            containers = client.containers.list(all=True)
             data = {
                 "Container": [c.name for c in containers],
                 "Status": [c.status for c in containers],
                 "Image": [c.image.tags[0] if c.image.tags else c.image.short_id for c in containers]
             }
             st.table(data)
-        else:
-            st.warning("No Docker containers found.")
-    except Exception as e:
-        st.error(f"Error fetching Docker containers: {e}")
+        except Exception as e:
+            st.warning("Docker not available. Showing demo containers.")
+            demo_data = {
+                "Container": ["web_app", "db_server"],
+                "Status": ["running", "exited"],
+                "Image": ["nginx:alpine", "mysql:5.7"]
+            }
+            st.table(demo_data)
 
 # -------------------- Terraform --------------------
 elif section == "Terraform":
@@ -220,31 +213,11 @@ elif section == "Terraform":
 
     with st.expander("📘 Notes - How Terraform Section Works"):
         st.markdown("""
-        - Works in **two modes** (select from dropdown below):
-          1. **Local State (default)**  
-             - Reads file:  
-               `~/smart-devops-dashboard/infra/terraform/terraform.tfstate`  
-             - No keys needed.  
-             - Example Output:  
-               - docker_image → nginx_img  
-               - docker_container → nginx  
-
-          2. **AWS S3 Remote State**  
-             - Requires **AWS Access Key, Secret Key, Region, S3 Bucket & Key**.  
-             - How to get keys:  
-               1. Login to **AWS Console**.  
-               2. Go to **IAM → Users → Security Credentials**.  
-               3. Create Access Keys.  
-               4. Copy Access Key + Secret Key here.  
-             - Example Inputs:  
-               - AWS Access Key → `AKIA...EXAMPLE`  
-               - AWS Secret Key → `wJalrXUtnFEMI...EXAMPLEKEY`  
-               - AWS Region → `us-east-1`  
-               - Bucket Name → `my-terraform-states`  
-               - Object Key → `dev/terraform.tfstate`  
+        - Works in **two modes**: Local State & AWS S3 Remote State
+        - Local: Reads `terraform.tfstate`
+        - AWS S3 Remote: Requires AWS credentials
         """)
 
-    # Mode selection
     mode = st.selectbox("Select Mode", ["Local", "AWS S3 Remote"])
 
     if mode == "Local":
@@ -260,7 +233,6 @@ elif section == "Terraform":
                 st.warning("No resources found in terraform.tfstate.")
         else:
             st.warning("Terraform files not found. Run `terraform apply` first.")
-
     elif mode == "AWS S3 Remote":
         access_key = st.text_input("AWS Access Key")
         secret_key = st.text_input("AWS Secret Key", type="password")
@@ -298,27 +270,30 @@ elif section == "Logs":
 
     with st.expander("📘 Notes - How Logs Section Works"):
         st.markdown("""
-        - Displays last 20 lines from a log file.
-        - Highlights **ERROR, WARNING, INFO**.
-        - Example input:
-          - Linux: `/var/log/syslog`
-          - Windows: `C:\\logs\\app.log`
-        - How to find logs:
-          - On Linux: `cd /var/log`
-          - On Windows: check your app log folder.
+        - Upload a log file to see the last 20 lines.
+        - Highlights ERROR, WARNING, INFO.
+        - Works online with file upload or locally with path.
         """)
 
-    log_file = st.text_input("Enter log file path (e.g., /var/log/syslog)")
+    log_file = st.file_uploader("Upload log file", type=["log", "txt"])
+    log_path = st.text_input("Or enter log file path (e.g., /var/log/syslog)")
+
     if log_file:
+        logs = log_file.read().decode("utf-8").splitlines()[-20:]
+    elif log_path:
         try:
-            with open(log_file) as f:
+            with open(log_path) as f:
                 logs = f.readlines()[-20:]
-            for line in logs:
-                if "ERROR" in line: st.error(line.strip())
-                elif "WARNING" in line: st.warning(line.strip())
-                else: st.info(line.strip())
         except Exception as e:
             st.error(f"Error reading log file: {e}")
+            logs = []
+    else:
+        logs = []
+
+    for line in logs:
+        if "ERROR" in line: st.error(line.strip())
+        elif "WARNING" in line: st.warning(line.strip())
+        else: st.info(line.strip())
 
 # -------------------- About --------------------
 elif section == "About":
@@ -326,10 +301,8 @@ elif section == "About":
 
     with st.expander("📘 Notes - About This Dashboard"):
         st.markdown("""
-        - This project combines **System Monitoring, Cloud, CI/CD, Docker, Terraform, and Logs** in one tool.
+        - Combines **System Monitoring, Cloud, CI/CD, Docker, Terraform, Logs** in one tool.
         - Built with **Python + Streamlit**.
         - Purpose: Simulates a real **DevOps Monitoring Dashboard**.
         - Created by **Rupesh** ❤️
         """)
-
-
