@@ -1,8 +1,9 @@
 # ⚡ Smart DevOps Dashboard  
 📊 **Centralized Monitoring & Automation for DevOps**  
+
 Deployed Live: [👉 Smart DevOps Dashboard](https://smart-devops-dashboard-jwtcse8jyuuihzq7ckhgr9.streamlit.app/)  
 
----
+Instruction: When you open the app, it will show the Home screen. For the sidebar options, click the left side top arrow >> (⇦) to expand the menu.
 
 ## 🌍 Overview  
 **Smart DevOps Dashboard** is a hands-on project built to strengthen **deployment, cloud, and automation skills**.  
@@ -135,7 +136,6 @@ Even as a **basic deployment project**, it demonstrates:
 [Smart DevOps Dashboard – Streamlit App](https://smart-devops-dashboard-jwtcse8jyuuihzq7ckhgr9.streamlit.app/)  
 
 ---
-
 ---
 ## 👨‍💻 Author  
 **Rupesh Kumar Shah**  
